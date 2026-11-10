@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecondHand MarketPlace - Student Campus Exchange</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand" onclick="resetFilters(); return false;">
+        <div class="brand-icon">📦</div>
+        <div class="brand-text">
+          <h1>SecondHand MarketPlace</h1>
+          <span>Student Used Items & Inquiries Portal</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <button class="btn btn-primary" id="openCreateModalBtn" onclick="openCreateModal()">
+          <span>+</span> Sell an Item
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO BANNER & STATS -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h2>Buy & Sell Used Items Within Campus</h2>
+        <p>List textbooks, electronics, dorm essentials, lab supplies, and ask student sellers questions before buying.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statActive">0</div>
+          <div class="stat-label">Available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statSold">0</div>
+          <div class="stat-label">Sold Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statInquiries">0</div>
+          <div class="stat-label">Inquiries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Total Listings</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="main-container">
+
+    <!-- SEARCH & FILTER SECTION -->
+    <section class="filter-panel">
+      <!-- Search Input -->
+      <div class="search-bar-row">
+        <div class="search-input-wrapper">
+          <span class="icon">🔍</span>
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="search-input" 
+            placeholder="Search listings by title, textbook name, model, or keywords..."
+            oninput="handleSearchInput()"
+          >
+        </div>
+        <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+      </div>
+
+      <!-- Filter Controls Grid -->
+      <div class="filter-controls-grid">
+        <!-- Category Filter -->
+        <div class="filter-group">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter" class="form-select" onchange="applyFilters()">
+            <option value="all">All Categories</option>
+            <option value="Books & Study Material">Books & Study Material</option>
+            <option value="Electronics & Gadgets">Electronics & Gadgets</option>
+            <option value="Hostel & Furniture">Hostel & Furniture</option>
+            <option value="Stationery & Supplies">Stationery & Supplies</option>
+            <option value="Sports & Fitness">Sports & Fitness</option>
+            <option value="Clothing & Fashion">Clothing & Fashion</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Condition Filter -->
+        <div class="filter-group">
+          <label for="conditionFilter">Condition</label>
+          <select id="conditionFilter" class="form-select" onchange="applyFilters()">
+            <option value="all">All Conditions</option>
+            <option value="Brand New">Brand New</option>
+            <option value="Like New">Like New</option>
+            <option value="Good">Good</option>
+            <option value="Fair">Fair</option>
+          </select>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="filter-group">
+          <label for="statusFilter">Status</label>
+          <select id="statusFilter" class="form-select" onchange="applyFilters()">
+            <option value="all">All Items (Available & Sold)</option>
+            <option value="available">Available Only</option>
+            <option value="sold">Sold Only</option>
+          </select>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div class="filter-group">
+          <label>Price Range (₹)</label>
+          <div class="price-inputs">
+            <input type="number" id="minPriceInput" class="form-input" placeholder="Min" min="0" oninput="applyFilters()">
+            <span>to</span>
+            <input type="number" id="maxPriceInput" class="form-input" placeholder="Max" min="0" oninput="applyFilters()">
+          </div>
+        </div>
+
+        <!-- Sort Option -->
+        <div class="filter-group">
+          <label for="sortFilter">Sort By</label>
+          <select id="sortFilter" class="form-select" onchange="applyFilters()">
+            <option value="newest">Newest First</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="title_asc">Title: A to Z</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Category Pills -->
+      <div class="category-pills" id="categoryPills">
+        <button class="pill-btn active" data-cat="all" onclick="selectCategoryPill('all')">All Items</button>
+        <button class="pill-btn" data-cat="Books & Study Material" onclick="selectCategoryPill('Books & Study Material')">📚 Books & Notes</button>
+        <button class="pill-btn" data-cat="Electronics & Gadgets" onclick="selectCategoryPill('Electronics & Gadgets')">💻 Electronics</button>
+        <button class="pill-btn" data-cat="Hostel & Furniture" onclick="selectCategoryPill('Hostel & Furniture')">🛏️ Hostel & Furniture</button>
+        <button class="pill-btn" data-cat="Stationery & Supplies" onclick="selectCategoryPill('Stationery & Supplies')">✏️ Stationery & Lab</button>
+        <button class="pill-btn" data-cat="Sports & Fitness" onclick="selectCategoryPill('Sports & Fitness')">🚲 Sports & Cycles</button>
+      </div>
+    </section>
+
+    <!-- RESULTS HEADER -->
+    <section class="results-header">
+      <div class="results-count" id="resultsCount">Loading listings...</div>
+      <div class="active-filter-chips" id="activeFilterChips"></div>
+    </section>
+
+    <!-- LISTINGS GRID -->
+    <section class="listings-grid" id="listingsGrid">
+      <!-- Cards rendered dynamically by app.js -->
+    </section>
+
+  </main>
+
+  <!-- MODAL: CREATE NEW LISTING (SELLER) -->
+  <div class="modal-overlay" id="createModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create New Listing</h3>
+        <button class="modal-close-btn" onclick="closeModal('createModal')">&times;</button>
+      </div>
+      <form id="createListingForm" onsubmit="handleCreateListing(event)">
+        <div class="modal-body">
+          <div class="form-grid">
+
+            <div class="form-full">
+              <label class="form-label" for="newTitle">Item Title <span class="req">*</span></label>
+              <input type="text" id="newTitle" class="form-input" placeholder="e.g. Higher Engineering Mathematics 44th Edition" required>
+            </div>
+
+            <div>
+              <label class="form-label" for="newCategory">Category <span class="req">*</span></label>
+              <select id="newCategory" class="form-select" required>
+                <option value="">Select Category</option>
+                <option value="Books & Study Material">Books & Study Material</option>
+                <option value="Electronics & Gadgets">Electronics & Gadgets</option>
+                <option value="Hostel & Furniture">Hostel & Furniture</option>
+                <option value="Stationery & Supplies">Stationery & Supplies</option>
+                <option value="Sports & Fitness">Sports & Fitness</option>
+                <option value="Clothing & Fashion">Clothing & Fashion</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" for="newCondition">Condition <span class="req">*</span></label>
+              <select id="newCondition" class="form-select" required>
+                <option value="">Select Condition</option>
+                <option value="Brand New">Brand New</option>
+                <option value="Like New">Like New</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+              </select>
+            </div>
+
+            <div class="form-full">
+              <label class="form-label" for="newPrice">Price (₹) <span class="req">*</span></label>
+              <input type="number" id="newPrice" class="form-input" placeholder="e.g. 450" min="0" step="1" required>
+            </div>
+
+            <div>
+              <label class="form-label" for="newSellerName">Your Name / Student ID</label>
+              <input type="text" id="newSellerName" class="form-input" placeholder="e.g. Rahul Sharma (CS-22)">
+            </div>
+
+            <div>
+              <label class="form-label" for="newSellerContact">Contact / Email / Phone</label>
+              <input type="text" id="newSellerContact" class="form-input" placeholder="e.g. rahul.cs@college.edu or 9876543210">
+            </div>
+
+            <div class="form-full">
+              <label class="form-label" for="newDescription">Description <span class="req">*</span></label>
+              <textarea id="newDescription" rows="3" class="form-input" placeholder="Describe the item condition, edition, usage details, and convenient pickup spot on campus..." required></textarea>
+            </div>
+
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('createModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="createSubmitBtn">Publish Listing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: INQUIRY & QUESTION DETAILS -->
+  <div class="modal-overlay" id="inquiryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="inquiryModalTitle">Listing Inquiries</h3>
+        <button class="modal-close-btn" onclick="closeModal('inquiryModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Summary Box -->
+        <div id="inquiryItemSummary" style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Inquiries History -->
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-800);">
+          Questions & Inquiries (<span id="inquiryCountSpan">0</span>)
+        </h4>
+        <div class="inquiries-timeline" id="inquiriesTimeline">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Submission Form or Sold Notice -->
+        <div id="inquiryFormContainer" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-200);">
+          <form id="submitInquiryForm" onsubmit="handleSubmitInquiry(event)">
+            <input type="hidden" id="inquiryListingId">
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--gray-800);">
+              Ask Seller a Question
+            </h4>
+            <div class="form-grid">
+              <div>
+                <label class="form-label" for="buyerName">Your Name <span class="req">*</span></label>
+                <input type="text" id="buyerName" class="form-input" placeholder="e.g. Ananya Roy" required>
+              </div>
+              <div>
+                <label class="form-label" for="buyerContact">Email / Phone</label>
+                <input type="text" id="buyerContact" class="form-input" placeholder="e.g. ananya@campus.edu">
+              </div>
+              <div class="form-full">
+                <label class="form-label" for="inquiryMessage">Your Question / Inquiry <span class="req">*</span></label>
+                <textarea id="inquiryMessage" rows="3" class="form-input" placeholder="e.g. Hi! Is the book still available? Can we meet today at the central library?" required></textarea>
+              </div>
+            </div>
+            <div style="margin-top: 0.75rem; display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-primary" id="inquirySubmitBtn">Send Inquiry</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sold Status Notice Banner (Displayed when item is sold!) -->
+        <div id="inquirySoldBlockedNotice" style="display: none; margin-top: 1.25rem;">
+          <div class="sold-notice-banner" style="font-size: 0.9rem; padding: 1rem; flex-direction: column; gap: 0.35rem;">
+            <div style="font-size: 1.25rem;">🔒 This item has been marked as SOLD</div>
+            <div style="font-weight: 400; color: #b91c1c;">
+              As per marketplace rules, listings marked as sold remain visible for browsing, but <strong>new inquiries cannot be submitted</strong>.
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('inquiryModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p><strong>SecondHand MarketPlace</strong> &copy; 2026 &bull; Built with pure Java, HTML5, and CSS &bull; Campus Student Portal</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
